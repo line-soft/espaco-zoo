@@ -380,40 +380,6 @@ td{
                      E-MAIL
                 ================================================== -->
 
-                <div class="field">
-
-                    <label for="email">
-                        E-mail
-                    </label>
-
-                    <input
-                        type="email"
-                        id="email"
-                        maxlength="150"
-                        value="{{ visita_edicao.email if visita_edicao else '' }}"
-                        placeholder="exemplo@email.com">
-
-                </div>
-
-
-                <!-- =================================================
-                     CPF / DOCUMENTO
-                ================================================== -->
-
-                <div class="field">
-
-                    <label for="cpf">
-                        CPF / Documento
-                    </label>
-
-                    <input
-                        type="text"
-                        id="cpf"
-                        maxlength="30"
-                        value="{{ visita_edicao.cpf if visita_edicao else '' }}"
-                        placeholder="Digite o CPF ou documento">
-
-                </div>
 
 
                 <!-- =================================================
@@ -470,11 +436,41 @@ td{
                         id="informacoes_visitante"
                         maxlength="5000"
                         required
-                        placeholder="Ex.: Motivo da visita, quem autorizou a entrada, interesse em contratar o salão, observações e outras informações...">{{ visita_edicao.informacoes_visitante if visita_edicao else '' }}</textarea>
+                        placeholder="Ex.: Data de interesse, número de pessoas, etc.">{{ visita_edicao.informacoes_visitante if visita_edicao else '' }}</textarea>
 
                 </div>
 
+<div class="field full">
 
+    <label>
+        Degustação
+    </label>
+
+    <div style="display:flex; gap:20px; align-items:center;">
+
+        <label style="display:flex; align-items:center; gap:8px; font-weight:600; cursor:pointer;">
+            <input
+                type="radio"
+                name="degustacao"
+                value="Com Degustação"
+                {% if visita_edicao and visita_edicao.degustacao == 'Com Degustação' %}checked{% endif %}
+                required>
+            Com Degustação
+        </label>
+
+        <label style="display:flex; align-items:center; gap:8px; font-weight:600; cursor:pointer;">
+            <input
+                type="radio"
+                name="degustacao"
+                value="Sem Degustação"
+                {% if visita_edicao and visita_edicao.degustacao == 'Sem Degustação' %}checked{% endif %}
+                required>
+            Sem Degustação
+        </label>
+
+    </div>
+
+</div>
             </div>
 
 
@@ -565,17 +561,15 @@ td{
                         </th>
 
                         <th>
-                            CPF / Documento
-                        </th>
-
-                        <th>
                             Data
                         </th>
 
                         <th>
                             Horário
                         </th>
-
+<th>
+    Degustação
+</th>
                         <th>
                             Informações
                         </th>
@@ -630,18 +624,6 @@ td{
                             {% endif %}
 
 
-                            {% if visita.email %}
-
-                                <div
-                                    class="muted"
-                                    style="margin-top:4px">
-
-                                    {{ visita.email }}
-
-                                </div>
-
-                            {% endif %}
-
                         </td>
 
 
@@ -649,21 +631,7 @@ td{
                              CPF
                         ========================================== -->
 
-                        <td>
-
-                            {% if visita.cpf %}
-
-                                {{ visita.cpf }}
-
-                            {% else %}
-
-                                <span class="muted">
-                                    Não informado
-                                </span>
-
-                            {% endif %}
-
-                        </td>
+                      
 
 
                         <!-- =========================================
@@ -695,7 +663,29 @@ td{
                         <!-- =========================================
                              INFORMAÇÕES
                         ========================================== -->
+<td>
 
+    {% if visita.degustacao == 'Com Degustação' %}
+
+        <span class="badge">
+            Com Degustação
+        </span>
+
+    {% elif visita.degustacao == 'Sem Degustação' %}
+
+        <span class="badge">
+            Sem Degustação
+        </span>
+
+    {% else %}
+
+        <span class="muted">
+            Não informado
+        </span>
+
+    {% endif %}
+
+</td>
                         <td>
 
                             <div class="visitor-info">
@@ -931,18 +921,6 @@ document
                 .value
                 .trim(),
 
-            email:
-                document
-                .getElementById("email")
-                .value
-                .trim(),
-
-            cpf:
-                document
-                .getElementById("cpf")
-                .value
-                .trim(),
-
             data:
                 document
                 .getElementById("data")
@@ -957,8 +935,13 @@ document
                 document
                 .getElementById("informacoes_visitante")
                 .value
-                .trim()
-
+                .trim(),
+            
+                degustacao:
+                document.querySelector(
+             'input[name="degustacao"]:checked'
+                 )?.value || ""
+            
         };
 
 
@@ -1012,7 +995,16 @@ document
             return;
 
         }
+        if(!payload.degustacao){
 
+    mostrarAviso(
+        "Informe se a visita teve degustação.",
+        "error"
+    );
+
+    return;
+
+}
 
         /* ====================================================
            DEFINE A ROTA
